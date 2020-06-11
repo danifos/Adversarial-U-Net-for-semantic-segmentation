@@ -527,12 +527,15 @@ class UnetSkipConnectionBlock(nn.Module):
                 model = down + [submodule] + up
 
         self.model = nn.Sequential(*model)
+        self.submodule = True if submodule else False
 
     def forward(self, x):
         if self.outermost:
-            return self.model(x)
+            ret = self.model(x)
         else:   # add skip connections
-            return torch.cat([x, self.model(x)], 1)
+            ret = torch.cat([x, self.model(x)], 1)
+        return ret
+
 
 
 class NLayerDiscriminator(nn.Module):

@@ -32,6 +32,9 @@ class Pix2PixModel(BaseModel):
         parser.set_defaults(norm='batch', netG='unet_256', dataset_mode='aligned')
         if is_train:
             parser.set_defaults(pool_size=0, gan_mode='vanilla')
+            parser.add_argument('--loss_type', type=str, default='L1',
+                    choices=['BCE', 'L1'], help='type of reconstruction loss (L1/BCE)')
+            parser.add_argument('--lambda_GAN', type=float, default=1.0, help='weight for GAN loss')
             parser.add_argument('--lambda_L1', type=float, default=100.0, help='weight for L1 loss')
 
         return parser
@@ -63,12 +66,20 @@ class Pix2PixModel(BaseModel):
         if self.isTrain:
             # define loss functions
             self.criterionGAN = networks.GANLoss(opt.gan_mode).to(self.device)
-            self.criterionL1 = torch.nn.L1Loss()
+            if self.opt.loss_type == 'L1':
+                self.criterionL1 = torch.nn.L1Loss()
+            elif self.opt.loss_type == 'BCE':
+                self.criterionL1 = torch.nn.BCEWithLogitsLoss()
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
             self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizers.append(self.optimizer_G)
             self.optimizers.append(self.optimizer_D)
+
+        # print('=========================  GENERATOR  ===========================')
+        # print(self.netG)
+        # print('=======================  DISCRIMINATOR  =========================')
+        # print(self.netD)
 
     def set_input(self, input):
         """Unpack input data from the dataloader and perform necessary pre-processing steps.
@@ -106,7 +117,7 @@ class Pix2PixModel(BaseModel):
         # First, G(A) should fake the discriminator
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
         pred_fake = self.netD(fake_AB)
-        self.loss_G_GAN = self.criterionGAN(pred_fake, True)
+        self.loss_G_GAN = self.criterionGAN(pred_fake, True) * self.opt.lambda_GAN
         # Second, G(A) = B
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_L1
         # combine loss and calculate gradients
