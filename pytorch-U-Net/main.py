@@ -189,16 +189,16 @@ def my_main(params):
     #         length=30, is_pad=params["padding"], evaluate=True, totensor=True)
 
     trainset = ISBI.ISBIDataset(
-        "../dataset/new train set/train_img/*.png", "../dataset/new train set/train_label/*.png",
+        "../../dataset/new train set/train_img/*.png", "../../dataset/new train set/train_label/*.png",
         length=25, is_pad=params["padding"], evaluate=False, totensor=True)
 
     if not params["evaluate"]:
         valset = ISBI.ISBIDataset(
-            "../dataset/new train set/train_img/*.png", "../dataset/new train set/train_label/*.png",
+            "../../dataset/new train set/train_img/*.png", "../../dataset/new train set/train_label/*.png",
             length=25, is_pad=params["padding"], evaluate=True, totensor=True)
     else:
         valset = ISBI.ISBIDataset(
-            "../dataset/new_test_set/test_img/*.png", "../dataset/new_test_set/test_label/*.png",
+            "../../dataset/new_test_set/test_img/*.png", "../../dataset/new_test_set/test_label/*.png",
             length=5, is_pad=params["padding"], evaluate=True, totensor=True)
 
     # num of workers can represent the number of cores in cpu, pinned memory is page-locked memory
