@@ -21,7 +21,7 @@ Also, this code should be compatible with Python versions 2.7-3.5.
 
 ## How to run:
 
-just Run main.py
+just run main.py
 
 You will see the predicted results of test image in data/membrane/test
 
