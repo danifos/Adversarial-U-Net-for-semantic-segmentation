@@ -1,13 +1,13 @@
-Keras-U-net
+##Keras-U-net
 
-Model:
+###Model:
 
 This deep neural network is implemented with Keras functional API, which makes it extremely easy to experiment with different interesting architectures.
 
 Output from the network is a 256*256 which represents mask that should be learned. Sigmoid activation function makes sure that mask pixels are in [0, 1] range.
 
 
-Dependencies:
+##Dependencies:
 
 This model depends on the following libraries:
 
@@ -16,7 +16,7 @@ This model depends on the following libraries:
 
 Also, this code should be compatible with Python versions 2.7-3.5.
 
-How to run:
+##How to run:
 
 just Run main.py
 
