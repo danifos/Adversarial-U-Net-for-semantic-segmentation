@@ -508,51 +508,24 @@ class LUnet(nn.Module):
 
         # https://pytorch.org/docs/master/nn.html#conv2d
         # in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias
-        self.conv1 = nn.Linear(512*512, 512)
-
-        # https://pytorch.org/docs/master/nn.html#batchnorm2d
-        # num_features/channels, eps, momentum, affine, track_running_stats
-
-        # https://pytorch.org/docs/master/nn.html#maxpool2d
-        # kernel_size, stride, padding, dilation, return_indices, ceil_mode
-        self.maxPool1 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
-
-        self.conv3 = nn.Linear(512, 256)
-
-        self.conv5 = nn.Linear(256, 128)
-
-        self.conv7 = nn.Linear(128, 64)
-
-        self.conv9 = nn.Linear(64, 32)
-
-        # https://pytorch.org/docs/master/nn.html#convtranspose2d
-        # in_channels, out_channels, kernel_size, stride, padding, output_padding, groups, bias, dilation
-
-        self.conv11 = nn.Linear(32, 64, 3)
-
-        self.conv13 = nn.Linear(64, 128, 3)
-
-        self.conv15 = nn.Linear(128, 256, 3)
-
-        self.conv17 = nn.Linear(256, 512)
-
-        self.conv19 = nn.Linear(512, 512*512*2)
+        L = 32
+        self.conv1 = nn.Linear(512*512, 16*L)
+        self.conv3 = nn.Linear(16*L, 8*L)
+        self.conv5 = nn.Linear(8*L, 4*L)
+        self.conv7 = nn.Linear(4*L, 2*L)
+        self.conv9 = nn.Linear(2*L, L)
+        self.conv11 = nn.Linear(L, 2*L)
+        self.conv13 = nn.Linear(2*L, 4*L)
+        self.conv15 = nn.Linear(4*L, 8*L)
+        self.conv17 = nn.Linear(8*L, 16*L)
+        self.conv19 = nn.Linear(16*L, 512*512*2)
         self.softmax = nn.Softmax2d()
 
         # weights can be initialized here:
         # for example:
         for idx, m in enumerate(self.modules()):
-            if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
-                # force float division, therefore use 2.0
-                # http://andyljones.tumblr.com/post/110998971763/an-explanation-of-xavier-initialization
-                # https://arxiv.org/abs/1502.01852
-                # a rectifying linear unit is zero for half of its input,
-                # so you need to double the size of weight variance to keep the signals variance constant.
-                # xavier would be: scalefactor * sqrt(2/ (inchannels + outchannels )
-                std = math.sqrt(2.0/(m.kernel_size[0]*m.kernel_size[0]*m.in_channels))
-                nn.init.normal_(m.weight, std=std)
-                #nn.init.xavier_normal_(m.weight)
-                nn.init.constant_(m.bias, 0)
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_normal_(m.weight)
 
     def forward(self, x, padding=False):
 
