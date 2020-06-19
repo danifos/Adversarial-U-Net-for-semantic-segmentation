@@ -16,9 +16,7 @@ def main():
     num_images = len(args.images)
 
     size = None
-    tptn = 0
-    fpfn = 0
-    total = 0
+    tp = tn = fp = fn = 0
     for i, (image, label) in enumerate(zip(args.images, args.labels)):
         image = cv.imread(image)
         label = cv.imread(label)
@@ -37,9 +35,10 @@ def main():
         _, image = cv.threshold(image, args.threshold, 1, cv.THRESH_BINARY)
         _, label = cv.threshold(label, args.threshold, 1, cv.THRESH_BINARY)
 
-        tptn += (image == label).sum()
-        fpfn += (image != label).sum()
-        total += size[0] * size[1]
+        tp += ((image == 0) & (label == 0)).sum()
+        fp += ((image == 0) & (label == 1)).sum()
+        fn += ((image == 1) & (label == 0)).sum()
+        tn += ((image == 1) & (label == 1)).sum()
 
         if args.visualize:
             plt.subplot(2, num_images, i+1)
@@ -49,8 +48,9 @@ def main():
             plt.imshow(label, cmap='gray')
             remove_ticks()
 
-    assert tptn+fpfn == total
-    print('acc:', tptn / (tptn+fpfn))
+    print('Accuracy:', (tp+tn)/(tp+tn+fp+fn))
+    print('F-score:', 0.5 * (2*tp / (2*tp+fp+fn) + 2*tn / (2*tn+fp+fn)))
+    print('Jaccard:', 0.5 * (tp / (tp+fp+fn) + tn / (tn+fp+fn)))
 
     if args.visualize:
         plt.show()
